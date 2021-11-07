@@ -1,6 +1,6 @@
 SELECT h.hacker_id, h.name
 FROM hackers h join submissions s on h.hacker_id = s.hacker_id
-    join challenges c on s.challenge_id = c.challenge_id and s.hacker_id = c.hacker_id
+    join challenges c on s.challenge_id = c.challenge_id
     join difficulty d on d.difficulty_level = c.difficulty_level
 WHERE d.score = s.score
 GROUP BY 1,2
