@@ -1,0 +1,3 @@
+set @mynum = 1;
+select repeat('* ', @mynum) from information_schema.tables
+where @mynum := @mynum + 1 and @mynum < 21
