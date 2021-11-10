@@ -16,3 +16,14 @@ WHERE hacker_id IN (
   HAVING COUNT(distinct submission_date) = 15
 )
 GROUP BY 1
+
+#wrong answer above
+
+#to get the count of the unique hacker_id
+SELECT COUNT(distinct hacker_id)  
+FROM Submissions s2  
+WHERE (SELECT COUNT(distinct s3.submission_date) 
+        FROM Submissions s3 
+        WHERE s3.hacker_id = s2.hacker_id AND s3.submission_date <= s2.submission_date
+       ) = dateDIFF(s2.submission_date , '2016-03-01')
+ ) 
