@@ -24,6 +24,7 @@ SELECT COUNT(distinct hacker_id)
 FROM Submissions s2  
 WHERE (SELECT COUNT(distinct s3.submission_date) 
         FROM Submissions s3 
-        WHERE s3.hacker_id = s2.hacker_id AND s3.submission_date <= s2.submission_date
+        WHERE s3.hacker_id = s2.hacker_id AND s3.submission_date < s2.submission_date 
+        #can't be equal because the first day date diff=0 and should include all hackers
        ) = dateDIFF(s2.submission_date , '2016-03-01')
  ) 
