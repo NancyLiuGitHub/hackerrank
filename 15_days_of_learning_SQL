@@ -1,0 +1,18 @@
+select submission_date, hacker_id, rank() over (partition by submission_date order by cnt desc, hacker_id) as r
+from (
+select submission_date, hacker_id, count(submission_id) as cnt
+from submissions
+GROUP BY 1,2 ) t
+order by 1,3 desc
+
+
+SELECT submission_date, count(distinct hacker_id) 
+FROM submissions
+WHERE hacker_id IN (
+  SELECT hacker_id
+  FROM submissions
+  WHERE submission_date between '2016-03-01' and '2016-03-15'
+  GROUP BY hacker_id
+  HAVING COUNT(distinct submission_date) = 15
+)
+GROUP BY 1
