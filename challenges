@@ -17,6 +17,13 @@ with cte as (
         group by 1)t
 )
 
+to simplify cte: 
+  select count(challenge_id) cnt
+  from challenges
+  group by hacker_id
+  order by cnt desc
+  limit 1
+
 with cte2 as (
   select cnt
   from (
@@ -27,11 +34,14 @@ with cte2 as (
   having count(hacker_id) > 1
 )
 
-select c.hacker_id, h.name, sum(challenges)
+select c.hacker_id, h.name, count(challenge_id)
 from challenges c join hackers h on c.hacker_id = h.hacker_id
 where hacker_id not in (
 select hacker_id
 from challenges
 group by 1
-having sum(challenges) = (select cnt from cte2) and sum(challenges) < (select m from cte))
+having count(challenge_id) in (select cnt from cte2) and count(challenge_id) < (select m from cte))
+#could be more than one cnt from cte2
 group by 1,2
+order by 3 desc, 1
+
