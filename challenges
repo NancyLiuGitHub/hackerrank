@@ -1,0 +1,37 @@
+#hacker_id, name, sum(challenges)
+#order by sum desc, hacker_id
+#exclude: count(sum)>2 and sum < max(challenges)
+
+#table
+#hackers: hacker_id, name
+#challenges: challenge_id, hacker_id
+
+#steps
+#max
+#get hacker_id which have count(sum)>2
+
+with cte as (
+  select max(cnt) m
+  from (select hacker_id, count(challenge_id) cnt 
+        from challenges 
+        group by 1)t
+)
+
+with cte2 as (
+  select cnt
+  from (
+  select hacker_id, count(challenge_id) cnt
+  from challenges
+  group by 1)t
+  group by 1
+  having count(hacker_id) > 1
+)
+
+select c.hacker_id, h.name, sum(challenges)
+from challenges c join hackers h on c.hacker_id = h.hacker_id
+where hacker_id not in (
+select hacker_id
+from challenges
+group by 1
+having sum(challenges) = (select cnt from cte2) and sum(challenges) < (select m from cte))
+group by 1,2
