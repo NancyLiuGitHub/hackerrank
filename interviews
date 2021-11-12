@@ -6,18 +6,48 @@ colleges: college_id, contest_id
 challenges: challenge_id, college_id
 view_stats:challenge_id, total_views, total_unique_views
 submission_stats: challenge_id, total_submissions, total_accepted_submissions
+contest_id, college_id, challenge_id, sum(numbers)
+1,a,111
+1,a,112
+2,b,333
+
 
 hacker_id, name<-contest_id,college_id -> challenge_id (one contest can have multiple challenge_id)-> view & submission
 
 select col.contest_id, hacker_id, name, count(total_submissions), count(total_accepted_submissions), count(total_views), count(total_unique_views)
 from colleges col join challenges cha on col.college_id = cha.college_id
-  join view_stats v on cha.challenge_id = v.challenge_id
-  join submission_stats s on cha.challenge_id = s.challenge_id
+  left join (select challenge_id, sum(), sum() from view_stats group by 1) v on cha.challenge_id = v.challenge_id
+  left join (select challenge_id, sum(), sum() from submission_stats group by 1) s on cha.challenge_id = s.challenge_id
   join contests c on c.contest_id = col.contest_id
 group by 1,2,3
 having count(total_submissions) != 0 
-  and count(total_accepted_submissions) != 0
-  and count(total_views) != 0
-  and count(total_unique_views) != 0
+  or count(total_accepted_submissions) != 0
+  or count(total_views) != 0
+  pr count(total_unique_views) != 0
 order by 1
 
+#correction1->change all the count to sum
+#correction2->use left join instead of join
+#correction3->in the having clause change "and" to "or"
+#correction4->first get the sum from view and submission seperately by challenge_id
+
+select con.contest_id,
+        con.hacker_id, 
+        con.name, 
+        sum(total_submissions), 
+        sum(total_accepted_submissions), 
+        sum(total_views), sum(total_unique_views)
+from contests con 
+join colleges col on con.contest_id = col.contest_id 
+join challenges cha on  col.college_id = cha.college_id 
+left join
+(select challenge_id, sum(total_views) as total_views, sum(total_unique_views) as total_unique_views
+from view_stats group by challenge_id) vs on cha.challenge_id = vs.challenge_id 
+left join
+(select challenge_id, sum(total_submissions) as total_submissions, sum(total_accepted_submissions) as total_accepted_submissions from submission_stats group by challenge_id) ss on cha.challenge_id = ss.challenge_id
+    group by con.contest_id, con.hacker_id, con.name
+        having sum(total_submissions)!=0 or 
+                sum(total_accepted_submissions)!=0 or
+                sum(total_views)!=0 or
+                sum(total_unique_views)!=0
+            order by contest_id;
