@@ -1,0 +1,23 @@
+#contest_id, hacker_id, name, count(submission), count(case when = accept then 1), count(views),count(distinct views)
+#order by contest_id
+#exclude all four sums are 0
+contests: contest_id, hacker_id, name  Q:a hacker can have multiple contest_id?
+colleges: college_id, contest_id
+challenges: challenge_id, college_id
+view_stats:challenge_id, total_views, total_unique_views
+submission_stats: challenge_id, total_submissions, total_accepted_submissions
+
+hacker_id, name<-contest_id,college_id -> challenge_id (one contest can have multiple challenge_id)-> view & submission
+
+select col.contest_id, hacker_id, name, count(total_submissions), count(total_accepted_submissions), count(total_views), count(total_unique_views)
+from colleges col join challenges cha on col.college_id = cha.college_id
+  join view_stats v on cha.challenge_id = v.challenge_id
+  join submission_stats s on cha.challenge_id = s.challenge_id
+  join contests c on c.contest_id = col.contest_id
+group by 1,2,3
+having count(total_submissions) != 0 
+  and count(total_accepted_submissions) != 0
+  and count(total_views) != 0
+  and count(total_unique_views) != 0
+order by 1
+
