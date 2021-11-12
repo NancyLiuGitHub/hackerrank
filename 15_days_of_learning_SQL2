@@ -1,0 +1,40 @@
+Select t3.submission_date, t3.hacker_id, h.name
+from (
+  select submission_date, hacker_id, rank() over (partition by submission_date order by cnt desc, hacker_id) as r
+  from (
+    select submission_date, hacker_id, count(submission_id) as cnt
+    from submissions
+    GROUP BY 1,2 )t
+   )t2
+  where r = 1 
+) t3
+join hackers h on t3.hacker_id = h.hacker_id
+
+SELECT submission_date, count(distinct hacker_id) 
+FROM submissions
+WHERE hacker_id IN (
+  SELECT hacker_id
+  FROM submissions
+  WEHRE submission_date between ‘2016-03-01’ and ‘2016-03-15’
+  GROUP BY hacker_id
+  HAVING COUNT(distinct submission_date) = 15
+)
+GROUP BY 1
+
+select 
+submission_date ,
+
+( SELECT COUNT(distinct hacker_id)  
+ FROM Submissions s2  
+ WHERE s2.submission_date = s1.submission_date 
+ AND    (SELECT COUNT(distinct s3.submission_date) 
+          FROM Submissions s3 
+          WHERE s3.hacker_id = s2.hacker_id AND s3.submission_date < s1.submission_date) 
+        = dateDIFF(s1.submission_date , '2016-03-01')) ,
+
+(select hacker_id  from submissions s2 where s2.submission_date = s1.submission_date 
+group by hacker_id order by count(submission_id) desc , hacker_id limit 1) as shit,
+(select name from hackers where hacker_id = shit)
+from 
+(select distinct submission_date from submissions) s1
+group by submission_date
