@@ -45,3 +45,55 @@ having count(challenge_id) in (select cnt from cte2) and count(challenge_id) < (
 group by 1,2
 order by 3 desc, 1
 
+select c.hacker_id, h.name, count(challenge_id)
+from challenges c join hackers h on c.hacker_id = h.hacker_id
+where c.hacker_id not in (
+select hacker_id
+from challenges
+group by 1
+having count(challenge_id) in (
+        select cnt
+        from (
+            select hacker_id, count(challenge_id) cnt
+            from challenges
+            group by 1)t
+        group by 1
+        having count(hacker_id) > 1) 
+    and count(challenge_id) < (
+            select max(cnt)
+            from (
+            select hacker_id, count(challenge_id) cnt
+            from challenges 
+            group by 1) t2
+            ))
+group by 1,2
+order by 3 desc, 1
+#all records returned
+
+
+
+
+
+#correct answer from other's
+
+select c.hacker_id, h.name ,count(c.hacker_id) as c_count
+from Hackers as h
+    inner join Challenges as c on c.hacker_id = h.hacker_id
+group by 1,2
+having 
+    c_count = 
+        (SELECT MAX(temp1.cnt)
+        from (SELECT COUNT(hacker_id) as cnt
+             from Challenges
+             group by hacker_id
+             order by hacker_id) temp1)
+
+    or c_count in 
+        (select t.cnt
+         from (select count(*) as cnt 
+               from challenges
+               group by hacker_id) t
+         group by t.cnt
+         having count(t.cnt) = 1)
+         
+order by c_count DESC, c.hacker_id
